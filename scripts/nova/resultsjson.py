@@ -15,5 +15,5 @@ for f in argus:
         dicts = map(json.loads, lines)
         # encode the list
         with open(os.path.splitext(f)[0] + '.json',"w") as fjson:
-            fjson.write(json.dumps(dicts))
+            fjson.write(json.dumps(dicts, indent=4))
 
