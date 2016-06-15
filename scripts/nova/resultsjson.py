@@ -9,6 +9,8 @@ with open("/opt/logs/db_api.log", "r") as logs:
     lines = logs.readlines()
     # remove the nasty new lines
     lines = map(lambda s: s.replace('\n',''), lines)
+    # decode each elements of the list
     dicts = map(json.loads, lines)
+    # encode the list
     with open("/opt/logs/db_api.json","w") as fjson:
         fjson.write(json.dumps(dicts))
