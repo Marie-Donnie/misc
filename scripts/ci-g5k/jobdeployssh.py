@@ -14,6 +14,8 @@ exclu = ex5.api_utils.get_g5k_clusters()
 excluded = [c for c in exclu if c not in okay]
 
 end = ex.time_utils.format_date(time.time()+12600)
+
+# must have a .env on the frontend that will deploy the ubuntu 
 envfile = "env/monubuntu.env"
 
 try:
