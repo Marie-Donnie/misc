@@ -11,6 +11,7 @@ import traceback
 plan = ex5.planning
 okay = ["paravance","grisou","graphene","griffon"]
 exclu = ex5.api_utils.get_g5k_clusters()
+# list that contains all clusters excepts those in okay list
 excluded = [c for c in exclu if c not in okay]
 
 end = ex.time_utils.format_date(time.time()+12600)
