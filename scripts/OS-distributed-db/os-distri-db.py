@@ -9,6 +9,9 @@ import traceback
 
 
 plan = ex5.planning
+grid = ex5.oargrid
+ky = ex5.kadeploy.
+
 okay = ["paravance","grisou","graphene","griffon"]
 exclu = ex5.api_utils.get_g5k_clusters()
 # list that contains all clusters excepts those in okay list
@@ -18,7 +21,6 @@ end = ex.time_utils.format_date(time.time()+1200)
 
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "env/monubuntu.env"
-dbfile = "db/ubmini.env"
 
 try:
     # makes a reservation
@@ -30,20 +32,18 @@ try:
     if startdate is None:
         sys.exit("Could not find a slot for the requested resources.")
     specs = plan.get_jobs_specs(resources, excluded_elements=excluded)
-    print("Using sites : " + resources)
-    subs, _ = ex5.oargrid.oargridsub(specs, walltime="00:05:00", job_type='deploy')
-    if subs is not None:
-        print("Using new oargrid job " + subs)
-    else:
+    # print("Using sites : %s" % resources)
+    subs, _ = grid.oargridsub(specs, walltime="00:05:00", job_type='deploy')
+    if subs is None:
         sys.exit("No oargrid job was created.")
-    # sub, site = specs[0]
-    # sub.additional_options = "-t deploy"
-    # sub.reservation_date = startdate
-    # sub.walltime = "00:05:00"
-    # job = ex5.oarsub([(sub, site)])
-    # job_id = job[0][0]
-    # job_site = job[0][1]
-    # hosts = ex5.get_oar_job_nodes(job_id, job_site)
+    else:
+        print("Using new oargrid job : %s" % subs)
+    jobs = grid.get_oargrid_job_oar_jobs(subs)
+    nodes = grid.get_oargrid_job_nodes(subs)
+    for job in jobs:
+        print("Job id : %s, site : %s" % (job[0], job[1]))
+    print(nodes)
+
     
 except Exception as e:
     t, value, tb = sys.exc_info()
