@@ -10,14 +10,14 @@ import traceback
 
 plan = ex5.planning
 grid = ex5.oargrid
-ky = ex5.kadeploy.
+ky = ex5.kadeploy
 
 okay = ["paravance","grisou","graphene","griffon"]
 exclu = ex5.api_utils.get_g5k_clusters()
 # list that contains all clusters excepts those in okay list
 excluded = [c for c in exclu if c not in okay]
 
-end = ex.time_utils.format_date(time.time()+1200)
+end = ex.time_utils.format_date(time.time()+1800)
 
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "env/monubuntu.env"
@@ -26,14 +26,14 @@ try:
     # makes a reservation
     print("Making a reservation")
     planning = plan.get_planning(endtime=end)
-    slots = plan.compute_slots(planning, walltime="00:05:00", excluded_elements=excluded)
+    slots = plan.compute_slots(planning, walltime="00:15:00", excluded_elements=excluded)
     startdate, enddate, resources = plan.find_free_slot(slots, {'grid5000':3})                    
     resources = plan.distribute_hosts(resources, {'grid5000':3}, excluded_elements=excluded)
     if startdate is None:
         sys.exit("Could not find a slot for the requested resources.")
     specs = plan.get_jobs_specs(resources, excluded_elements=excluded)
     # print("Using sites : %s" % resources)
-    subs, _ = grid.oargridsub(specs, walltime="00:05:00", job_type='deploy')
+    subs, _ = grid.oargridsub(specs, walltime="00:15:00", job_type='deploy')
     if subs is None:
         sys.exit("No oargrid job was created.")
     else:
@@ -44,6 +44,11 @@ try:
         print("Job id : %s, site : %s" % (job[0], job[1]))
     print(nodes)
 
+    # deploys
+    print("Deploying monubuntu")
+    deployment = ky.Deployment(hosts=nodes, env_file=envfile)
+    deployed_hosts, _ = ky.deploy(deployment)
+    print("Deployed on %s" % deployed_hosts)  
     
 except Exception as e:
     t, value, tb = sys.exc_info()
@@ -51,12 +56,7 @@ except Exception as e:
     traceback.print_tb(tb)
     
 
-# try:
-#     # deploys
-#     print("Deploying monubuntu at " + job_site)
-#     deployment = ex5.kadeploy.Deployment(hosts=host, env_file=envfile)
-#     deployed_hosts, _ = ex5.deploy(deployment)
-#     # print("Deployed on " + deployed_host[0])
+
     
 #     if len(deployed_hosts) != 0:
 #         # gets the agent started, starting by downloading it
