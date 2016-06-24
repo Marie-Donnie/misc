@@ -51,9 +51,9 @@ try:
     print("Deployed on %s" % deployed_hosts)
     if len(deployed_hosts) == 0:
         raise DeploymentError("Error while deploying")      
-    ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", deployed_hosts[0], connection_params={'user':'ci'}).run()
+    ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", nodes[0], connection_params={'user':'ci'}).run()
     print("Deploying discovery devstack")
-    ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", deployed_hosts[0], connection_params={'user':'ci'}).run().stdout
+    ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", node[0], connection_params={'user':'ci'}).run()
     
 except Exception as e:
     t, value, tb = sys.exc_info()
