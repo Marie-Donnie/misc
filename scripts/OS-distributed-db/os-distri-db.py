@@ -55,19 +55,26 @@ try:
     # prepares disco-vagrant
     main = nodes[0]
     db = [nodes[1], nodes[2]]
-    print(main)
-    print(db)
+    print("Discovery-vagrant will deploy on : %s" % main)
+    print("The databases will be stored on : %s" % db)
     
     # gets the ips for the database and stores them into a file
     for node in db:
-        ifconfig = ex.process.SshProcess("ifconfig", node, connection_params={'user':'ci'})
+        ifconfig = ex.process.SshProcess("ifconfig eth0", node, connection_params={'user':'ci'})
         ifconfig.run()
         with open("ip.txt", "a") as ipfile:
             ipfile.write(ifconfig.stdout)
+    print("Ips stored")
+    
     # copies the file to the main vm
-    ex.action.Put(main, "ip.txt", connection_params={'user':'ci'}).run()
-    # ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
+    ex.action.Put([main], ["ip.txt"], connection_params={'user':'ci'}).run()
+    print("File copied")
+    ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/changeip.sh", main, connection_params={'user':'ci'}).run()
+    print("Script downloaded")
     ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
+    ex.action.Remote("chmod +x changeip.sh ; ./changeip.sh ip.txt", main, connection_params={'user':'ci'}).run()
+    
+    print("Discovery-Vagrant cloned")
     print("Deploying discovery devstack")
     # ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", node[0], connection_params={'user':'ci'}).run()
 
