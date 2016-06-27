@@ -17,7 +17,7 @@ exclu = ex5.api_utils.get_g5k_clusters()
 # list that contains all clusters excepts those in okay list
 excluded = [c for c in exclu if c not in okay]
 
-end = ex.time_utils.format_date(time.time()+1800)
+end = ex.time_utils.format_date(time.time()+4000)
 
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "envdb/monubuntu.env"
@@ -26,14 +26,14 @@ try:
     # makes a reservation
     print("Making a reservation")
     planning = plan.get_planning(endtime=end)
-    slots = plan.compute_slots(planning, walltime="00:15:00", excluded_elements=excluded)
+    slots = plan.compute_slots(planning, walltime="01:00:00", excluded_elements=excluded)
     startdate, enddate, resources = plan.find_free_slot(slots, {'grid5000':3})                    
     resources = plan.distribute_hosts(resources, {'grid5000':3}, excluded_elements=excluded)
     if startdate is None:
         raise ReservationError("Could not find a slot for the requested resources.")
     specs = plan.get_jobs_specs(resources, excluded_elements=excluded)
     # print("Using sites : %s" % resources)
-    subs, _ = grid.oargridsub(specs, walltime="00:15:00", job_type='deploy')
+    subs, _ = grid.oargridsub(specs, walltime="01:00:00", job_type='deploy')
     if subs is None:
         raise ReservationError("No oargrid job was created.")
     else:
@@ -50,10 +50,24 @@ try:
     deployed_hosts, _ = ky.deploy(deployment)
     print("Deployed on %s" % deployed_hosts)
     if len(deployed_hosts) == 0:
-        raise DeploymentError("Error while deploying")      
-    ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", nodes[0], connection_params={'user':'ci'}).run()
+        raise DeploymentError("Error while deploying")
+    
+    # prepares disco-vagrant
+    main = nodes[0]
+    db = [nodes[1], nodes[2]]
+    print(main)
+    print(db)
+    for node in db:
+        ifconfig = ex.process.SshProcess("ifconfig", node, connection_params={'user':'ci'})
+        ifconfig.run()
+        with open("ip.txt", "a") as ipfile:
+            ipfile.write(ifconfig.stdout)
+    ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
     print("Deploying discovery devstack")
-    ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", node[0], connection_params={'user':'ci'}).run()
+    # ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", node[0], connection_params={'user':'ci'}).run()
+
+    
+    os.remove("ip.txt")
     
 except Exception as e:
     t, value, tb = sys.exc_info()
