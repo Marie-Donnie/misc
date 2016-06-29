@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# gets the ips from the file given in argument, which is supposed to have received
-# the result for "ifconfig eth0" from both VMs.
+# This script enables devstack to use remotes mysql and redis databases.
+# It takes a text file as argument, which is supposed to have received
+# the result of "ifconfig eth0" from both VMs.
+
+# gets the ips from the file
 ipfile="$1"
 grep "inet addr:" $ipfile | cut -d: -f2 | awk '{ print $1}' > ips.txt
 ipmysql=$(head -1 ips.txt)
