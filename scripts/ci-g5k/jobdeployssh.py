@@ -49,7 +49,7 @@ try:
     # print("Deployed on " + deployed_host[0])
     
     if len(deployed_hosts) != 0:
-        # gets the agent started, starting by downloading it
+        # gets the agent started after downloading it
         print("Downloading and launching the slave agent")
         ex.action.Remote("wget https://ci.inria.fr/beyondtheclouds/jnlpJars/slave.jar", deployed_hosts, connection_params={'user':'ci'}).run()
         # replaces the process with the ssh connection and the launching of the slave agent
