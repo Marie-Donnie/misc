@@ -15,7 +15,7 @@ echo $ipredis
 # stores them in the discovery-vagrant scripts for deployment
 cmd="sed -i 's\/\^redis_cluster_enabled: False\$\/\&\\\nnodes=${ipredis}\/' rome.conf"
   # add a "MYSQL_HOST=<IpAddressForMySqlDB>" before EOM in file 05_devstack.sh
-sed -i "s/^EOM$/MYSQL_HOST=${ipmysql}\n&/" discovery-vagrant/05_devstack.sh
+sed -i "s/^EOM$/MYSQL_HOST=${ipmysql}\nMYSQL_USER=stack\nMYSQL_PASSWORD=devstack\n&/" discovery-vagrant/05_devstack.sh
   # add a "sed -i s/^redis_cluster_enabled: False$/&\nnodes=<IpAdressForRedisDB>/ rome.conf"
   # line to 02_rome.sh which will enable to put the ip adress in rome.conf during the
   # discovery-vagrant deployment.
