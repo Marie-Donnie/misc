@@ -7,7 +7,8 @@ mysql -u root -e "GRANT ALL ON *.* to stack@'%' IDENTIFIED BY 'devstack'"
 mysql -u root -e "FLUSH PRIVILEGES"
 
 # removes the local default binding
-sed -i 's/bind-address = 127.0.0.1/# &/' /etc/mysql/my.cnf
+sed -i '/bind-address/s/^/#/' /etc/mysql/my.cnf
+
 
 # restarts the server
 /etc/init.d/mysql restart

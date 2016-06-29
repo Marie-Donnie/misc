@@ -1,13 +1,12 @@
 import os, sys
+import time
+import traceback
 import execo as ex
 import execo_g5k as ex5
 from execo_g5k import oar
-import time
+from execo_engine import logger
 from execo.time_utils import *
 from execo.process import *
-from execo_engine import logger
-import traceback
-
 
 plan = ex5.planning
 grid = ex5.oargrid
