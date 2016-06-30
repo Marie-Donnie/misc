@@ -8,7 +8,7 @@ Meant to be used with my fork of Nova and ROME :
 
 [ROME](https://github.com/Marie-Donnie/rome "My ROME Fork")
 
-You need to make a usable ~/opt/logs~ folder :
+You need to make a usable `/opt/logs` folder :
 ```bash
 mkdir /opt/logs
 chown stack:stack /opt/logs
@@ -19,7 +19,7 @@ Make some tests (unittest or rally) to get the logs :
 + By default, it will generate a log for ROME implementation
 + Change [IMPL](https://github.com/Marie-Donnie/nova/blob/disco/mitaka/nova/db/api.py#L124) to true to switch to SqlAlchemy and launch the tests again
 
-You have now two files in ~/opt/logs~ : ~db_api_mysql~ and ~db_api_disco~
+You have now two files in `/opt/logs` : `db_api_mysql` and `db_api_disco`
 
-Simply run ~analyse.sh~ that will generate the result in a text file in the folder where you ran the script.
+Simply run `analyse.sh` that will generate the result in a text file in the folder where you ran the script.
 
