@@ -21,5 +21,5 @@ Make some tests (unittest or rally) to get the logs :
 
 You have now two files in `/opt/logs` : `db_api_mysql` and `db_api_disco`
 
-Simply run `analyse.sh` that will generate the result in a text file in the folder where you ran the script.
+Simply run `analyse.sh` that will generate the results in a text file in the folder where you ran the script.
 

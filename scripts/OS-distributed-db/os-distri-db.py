@@ -71,17 +71,33 @@ try:
     logger.info("File copied")
     ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
     logger.info("Discovery-Vagrant cloned")
-    # handles the scripts
+    # handles the scripts, gives access to the databases
     ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/changeip.sh", main, connection_params={'user':'ci'}).run()
     ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/db-access.sh", db, connection_params={'user':'ci'}).run()    
     logger.info("Scripts downloaded")
     ex.action.Remote("chmod +x changeip.sh ; ./changeip.sh ip.txt", main, connection_params={'user':'ci'}).run()
     ex.action.Remote("chmod +x db-access.sh ; sudo ./db-access.sh", db, connection_params={'user':'ci'}).run()
-    
 
+    # uses discovery-vagrant with remote databases
     logger.info("Deploying discovery devstack")
     ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", main, connection_params={'user':'ci'}).run()
     logger.info("Disco OS deployed")
+
+    # launches the tests
+    logger.info("Cloning rally-vagrant...")
+    ex.action.Remote("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", main, connection_params={'user':'ci'}).run()
+    logger.info("Done")
+    logger.info("Executing tests")
+    ex.action.Remote("cd rally-vagrant ; python rally-g5k.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", main, connection_params={'user':'ci'}).run()
+    logger.info("Tests finished")
+
+    # gets the results
+    # logger.info("Analyzing the results")    
+    # ex.action.Remote("git clone https://github.com/Marie-Donnie/misc.git", main, connection_params={'user':'ci'}).run()
+    # ex.action.Remote("cd misc/scripts/nova/ ; chmod +x analyse.sh ; ./analyse.sh", db, connection_params={'user':'ci'}).run()
+    # logger.info("Done")
+    
+    
     os.remove("ip.txt")
     logger.info("Files removed")
     
