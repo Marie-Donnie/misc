@@ -1,4 +1,4 @@
-"""Argus.
+"""Openstack with distributed databases
 
 Usage:
     os-distri-db.py reservation
@@ -65,7 +65,7 @@ class os_distri_db():
             logger.info("Using new oar job : %s, on site : %s" % (job_id, site))
             logger.info("Waiting for job to start")
             self.nodes = ex5.get_oar_job_nodes(job_id, site)
-            logger.info("Using nodes : %s" % nodes)
+            logger.info("Using nodes : %s" % self.nodes)
             logger.info("Reservation done")
             
         except Exception as e:
@@ -76,9 +76,9 @@ class os_distri_db():
         try:
             if not self.resa_only:
                 for impl in self.implementation:
-                    print(impl)
+                    logger.info("Using %s for implementation" % impl)
                     if impl not in {"mysql", "disco"}:
-                        raise ValueError("Use only mysql or disco arguments")
+                        raise ValueError("Use only mysql or disco arguments")                    
                     self.deploys()
                     self._disco_vag(impl)
                     os.remove("ip.txt")
@@ -88,20 +88,21 @@ class os_distri_db():
             t, value, tb = sys.exc_info()
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
+            logger.info(__doc__)
             
     def deploys(self):
         # deploys
         logger.info("Deploying ubuntu on nodes")
         deployment = ky.Deployment(hosts=self.nodes, env_file=envfile)
-        deployed_hosts, _ = ky.deploy(deployment)
+        deployed_hosts, _ = ky.deploy(deployment, check_deployed_command=False)
         logger.info("Deployed on %s" % deployed_hosts)
         if len(deployed_hosts) == 0:
             raise DeploymentError("Error while deploying")
 
     def _disco_vag(self, impl="disco"):
         # prepares disco-vagrant
-        main = nodes[0]
-        db = nodes[1]
+        main = self.nodes[0]
+        db = self.nodes[1]
         logger.info("Discovery-vagrant will deploy on : %s, for %s implementation" % (main, impl))
         logger.info("The databases will be stored on : %s" % db)
 
