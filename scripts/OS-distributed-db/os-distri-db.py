@@ -35,7 +35,7 @@ end = ex.time_utils.format_date(time.time()+11000)
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "envdb/monubuntu.env"
 
-class os-distri-db():
+class os_distri_db():
 
     def __init__(self):
         """Define options for the experiment"""
@@ -51,14 +51,10 @@ class os-distri-db():
                 self.implementation = [argus["-i"]]
             else:
                 self.resa_only = True
-        print(self.resa_only)
-        print(self.implementation)
 
     def run(self):
         """Perform experiment"""
-        print("Options : %s" % self.options)
-
-            
+        
         try:
             # makes a reservation                                 
             logger.info("Making a reservation")
@@ -68,7 +64,7 @@ class os-distri-db():
                 raise ValueError("Could not find a slot for the requested resources.")
             logger.info("Using new oar job : %s, on site : %s" % (job_id, site))
             logger.info("Waiting for job to start")
-            nodes = ex5.get_oar_job_nodes(job_id, site)
+            self.nodes = ex5.get_oar_job_nodes(job_id, site)
             logger.info("Using nodes : %s" % nodes)
             logger.info("Reservation done")
             
@@ -85,6 +81,8 @@ class os-distri-db():
                         raise ValueError("Use only mysql or disco arguments")
                     self.deploys()
                     self._disco_vag(impl)
+                    os.remove("ip.txt")
+                    logger.info("Files removed")
                     
         except Exception as e:
             t, value, tb = sys.exc_info()
@@ -94,7 +92,7 @@ class os-distri-db():
     def deploys(self):
         # deploys
         logger.info("Deploying ubuntu on nodes")
-        deployment = ky.Deployment(hosts=nodes, env_file=envfile)
+        deployment = ky.Deployment(hosts=self.nodes, env_file=envfile)
         deployed_hosts, _ = ky.deploy(deployment)
         logger.info("Deployed on %s" % deployed_hosts)
         if len(deployed_hosts) == 0:
@@ -104,7 +102,7 @@ class os-distri-db():
         # prepares disco-vagrant
         main = nodes[0]
         db = nodes[1]
-        logger.info("Discovery-vagrant will deploy on : %s, for %s implementation" % (main, impl)
+        logger.info("Discovery-vagrant will deploy on : %s, for %s implementation" % (main, impl))
         logger.info("The databases will be stored on : %s" % db)
 
         # gets the ips for the database and stores them into a file
@@ -127,7 +125,7 @@ class os-distri-db():
         ex.action.Remote("chmod +x db-access.sh ; sudo ./db-access.sh", db, connection_params={'user':'ci'}).run()
 
         # make some changes for discovery-vagrant, since default uses ROME
-        if (impl="mysql"):
+        if (impl=="mysql"):
             logger.info("Adjusting deployment for mysql")
             ex.action.Remote("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", main, connection_params={'user':'ci'}).run()   
 
@@ -154,15 +152,15 @@ class os-distri-db():
     # ex.action.Remote("git clone https://github.com/Marie-Donnie/misc.git", main, connection_params={'user':'ci'}).run()
     # ex.action.Remote("cd misc/scripts/nova/ ; chmod +x analyse.sh ; ./analyse.sh", db, connection_params={'user':'ci'}).run()
     # logger.info("Done")
-    
-    
-    os.remove("ip.txt")
-    logger.info("Files removed")
-    
-except Exception as e:
-    t, value, tb = sys.exc_info()
-    print str(t) + " " + str(value)
-    traceback.print_tb(tb)
+
+
+
+if __name__ == "__main__":
+    engine = os_distri_db()
+    engine.run()
+
+
+
     
 
 
