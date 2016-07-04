@@ -115,8 +115,8 @@ class os_distri_db():
                     
         # copies the file to the main vm
         ex.action.Put([main], ["ip.txt"], connection_params={'user':'ci'}).run()
-        logger.info("File copied")
-        ex.action.Remote("git clone https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
+        logger.info("Ip file copied")
+        ex.action.Remote("git clone -b my-versions https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
         logger.info("Discovery-Vagrant cloned")
         # handles the scripts, gives access to the databases
         ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/changeip.sh", main, connection_params={'user':'ci'}).run()
