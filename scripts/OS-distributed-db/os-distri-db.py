@@ -135,6 +135,10 @@ class os_distri_db():
         ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", main, connection_params={'user':'ci'}).run()
         logger.info("Disco OS deployed")
 
+        # save the logs in a easier-to-get folder
+        ex.action.Remote("cd discovery-vagrant ; vagrant ssh pop0 -c \"sudo sed -i 's/opt\/logs/vagrant/' /opt/stack/nova/nova/db/api.py\"", main, connection_params={'user':'ci'}).run()
+        
+
         # launches the tests
         logger.info("Cloning rally-vagrant...")
         ex.action.Remote("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", main, connection_params={'user':'ci'}).run()
@@ -144,9 +148,9 @@ class os_distri_db():
         logger.info("Tests finished")
 
    
-        # path = "/opt/logs/db_api_" + impl
-        # ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'})
-
+        path = "/vagrant/db_api_" + impl + ".json"
+        ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'})
+        logger.info("Got file %s" % path)
     
     # gets the results
     # logger.info("Analyzing the results")    
