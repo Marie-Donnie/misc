@@ -171,7 +171,7 @@ class os_distri_db():
         logger.info("Tests finished")
 
         # get back the json file
-        path = "/home/ci/discovery-vagrant/db_api_" + impl + ".log"
+        path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
         ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
 
