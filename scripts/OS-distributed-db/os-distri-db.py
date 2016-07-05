@@ -150,7 +150,7 @@ class os_distri_db():
         ex.action.Remote("chmod +x changeip.sh ; ./changeip.sh ip.txt", main, connection_params={'user':'ci'}).run()
         ex.action.Remote("chmod +x db-access.sh ; sudo ./db-access.sh", db, connection_params={'user':'ci'}).run()
         ex.action.Remote("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/&-vagrant/' 05_devstack.sh", main, connection_params={'user':'ci'}).run()
-        ex.action.Remote("sed -i 's/chmod -R a+w \/opt\/logs/&\nmkdir \/vagrant\/logs\nchown stack:stack \/vagrant\/logs\nchmod -R a+w \/vagrant\/logs/' 02_rome.sh", main, connection_params={'user':'root'}).run()
+        ex.action.Remote("cd discovery-vagrant ; sed -i 's/chmod -R a+w \/opt\/logs/&\nmkdir \/vagrant\/logs\nchown stack:stack \/vagrant\/logs\nchmod -R a+w \/vagrant\/logs/' 02_rome.sh", main, connection_params={'user':'ci'}).run()
         # make some changes for discovery-vagrant, since default uses ROME
         if (impl=="mysql"):
             logger.info("Adjusting deployment for mysql")
