@@ -99,8 +99,7 @@ class os_distri_db():
                     raise ValueError("Use only mysql or disco arguments")                    
                 self.deploys()
                 self._disco_vag(impl)
-                os.remove("ip.txt")
-                logger.info("Files removed")
+
                     
         except Exception as e:
             t, value, tb = sys.exc_info()
@@ -177,6 +176,9 @@ class os_distri_db():
         path = "/vagrant/db_api_" + impl + ".json"
         ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
+
+        os.remove("ip.txt")
+        logger.info("Files removed")
     
     # gets the results
     # logger.info("Analyzing the results")    
