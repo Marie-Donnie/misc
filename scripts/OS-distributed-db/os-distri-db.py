@@ -1,16 +1,24 @@
 """Openstack with distributed databases
 
 Usage:
-    os-distri-db.py reservation
-    os-distri-db.py run (--full | -i <impl>)
+    os-distri-db.py reservation [--site <city>]
+    os-distri-db.py reservation [--duration <time>]
+    os-distri-db.py reservation [--nodes <nb>]
+    os-distri-db.py reservation --only
+    os-distri-db.py run [(--job_id <id> --job_site <city>)(--full | -i <impl>)]
     os-distri-db.py (-h | --help)
     os-distri-db.py --version
 
 Options:
-    -h --help     Show this screen
-    --version     Show version
-    --full        Run tests for both implementation
-    -i <impl>     Choose implementation 
+    -h --help          Show this screen
+    --version          Show version
+    --site <city>      Choose the site [default: rennes]
+    --duration <time>  A duration, formatted hh:mm:ss, must be <= to [default: 03:00:00]
+    --nodes <nb>       Number of nodes [default: 2]
+    --full             Run tests for both implementation
+    -i <impl>          Choose implementation 
+    --job_id <id>      Specify the job id of an already created job
+    --job_site <city>  Specify the job site of an already created job
 
 
 """
@@ -29,7 +37,6 @@ from docopt import docopt
 plan = ex5.planning
 ky = ex5.kadeploy
 
-
 end = ex.time_utils.format_date(time.time()+11000)
 
 # must have a .env on the frontend that will deploy the ubuntu 
@@ -42,63 +49,82 @@ class os_distri_db():
         argus = docopt(__doc__, version = 'Deployments 1.0')
         print(argus)
 
-        self.resa_only = False
+        self.resa_only = argus["--only"]
+        self.machines = argus["--nodes"]
+        self.duration = argus["--duration"]
+        self.site = argus["--site"]
+        self.job_id = argus["--job_id"]
+        self.job_site = argus["--job_site"]
         self.implementation = []
         if argus["--full"]:
             self.implementation = ["disco", "mysql"]
         else:
             if argus["-i"]:
                 self.implementation = [argus["-i"]]
-            else:
-                self.resa_only = True
 
     def run(self):
         """Perform experiment"""
         
         try:
-            # makes a reservation                                 
-            logger.info("Making a reservation")
-            job = ex5.oarsub([( ex5.OarSubmission(resources = "/cluster=1/nodes=2", walltime="03:00:00", job_type='deploy'), "rennes")])
-            job_id, site = job[0]
-            if job_id is None:
-                raise ValueError("Could not find a slot for the requested resources.")
-            logger.info("Using new oar job : %s, on site : %s" % (job_id, site))
-            logger.info("Waiting for job to start")
-            self.nodes = ex5.get_oar_job_nodes(job_id, site)
+            if self.job_id is None:
+                # makes a reservation                                 
+                logger.info("Making a reservation for %s nodes, on site: %s, during %s" % (str(self.machines), self.site, self.duration))
+                job = ex5.oarsub([( ex5.OarSubmission(resources = "/cluster=1/nodes="+str(self.machines), walltime=self.duration, job_type='deploy'), self.site)])
+                job_id, site = job[0]
+                if job_id is None:
+                    raise ValueError("Could not find a slot for the requested resources.")
+                logger.info("Using new oar job : %s, on site : %s" % (job_id, site))
+                logger.info("Waiting for job to start")
+                self.nodes = ex5.get_oar_job_nodes(job_id, site)
+                logger.info("Reservation done")
+                if self.resa_only:
+                    exit
+            else:
+                if self.job_id.isdigit():
+                    self.nodes = ex5.get_oar_job_nodes(int(self.job_id), self.job_site)
+                else:
+                    raise ValueError("Use a number for job id")
             logger.info("Using nodes : %s" % self.nodes)
-            logger.info("Reservation done")
             
         except Exception as e:
             t, value, tb = sys.exc_info()
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
+            logger.info(__doc__)
 
         try:
-            if not self.resa_only:
-                for impl in self.implementation:
-                    logger.info("Using %s for implementation" % impl)
-                    if impl not in {"mysql", "disco"}:
-                        raise ValueError("Use only mysql or disco arguments")                    
-                    self.deploys()
-                    self._disco_vag(impl)
-                    os.remove("ip.txt")
-                    logger.info("Files removed")
+            for impl in self.implementation:
+                logger.info("Using %s for implementation" % impl)
+                if impl not in {"mysql", "disco"}:
+                    raise ValueError("Use only mysql or disco arguments")                    
+                self.deploys()
+                self._disco_vag(impl)
+                os.remove("ip.txt")
+                logger.info("Files removed")
                     
         except Exception as e:
             t, value, tb = sys.exc_info()
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
             logger.info(__doc__)
+
             
     def deploys(self):
         # deploys
-        logger.info("Deploying ubuntu on nodes")
-        deployment = ky.Deployment(hosts=self.nodes, env_file=envfile)
-        deployed_hosts, _ = ky.deploy(deployment, check_deployed_command=False)
-        logger.info("Deployed on %s" % deployed_hosts)
-        if len(deployed_hosts) == 0:
-            raise DeploymentError("Error while deploying")
+        try:
+            logger.info("Deploying ubuntu on nodes")
+            deployment = ky.Deployment(hosts=self.nodes, env_file=envfile)
+            deployed_hosts, _ = ky.deploy(deployment, check_deployed_command=False)
+            logger.info("Deployed on %s" % deployed_hosts)
+            if len(deployed_hosts) == 0:
+                raise ValueError("Error while deploying the environment file")
+            
+        except Exception as e:
+            t, value, tb = sys.exc_info()
+            print str(t) + " " + str(value)
+            traceback.print_tb(tb)
 
+            
     def _disco_vag(self, impl="disco"):
         # prepares disco-vagrant
         main = self.nodes[0]
@@ -149,7 +175,7 @@ class os_distri_db():
 
    
         path = "/vagrant/db_api_" + impl + ".json"
-        ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'})
+        ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
     
     # gets the results
