@@ -16,7 +16,7 @@ Options:
     --duration <time>  A duration, formatted hh:mm:ss, must be <= to [default: 03:00:00]
     --nodes <nb>       Number of nodes [default: 2]
     --full             Run tests for both implementation
-    -i <impl>          Choose implementation 
+    -i <impl>          Choose implementation (disco or mysql)
     --job_id <id>      Specify the job id of an already created job
     --job_site <city>  Specify the job site of an already created job
 
@@ -41,6 +41,9 @@ end = ex.time_utils.format_date(time.time()+11000)
 
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "envdb/monubuntu.env"
+
+disco_vagrant = "https://github.com/Marie-Donnie/discovery-vagrant.git"
+o_s_d = "https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/"
 
 class os_distri_db():
 
@@ -97,9 +100,12 @@ class os_distri_db():
                 logger.info("Using %s for implementation" % impl)
                 if impl not in {"mysql", "disco"}:
                     raise ValueError("Use only mysql or disco arguments")                    
-                self.deploys()
-                self._disco_vag(impl)
-
+                self.deploy_ubuntu()
+                self._preparation(impl)
+                self._exec_on_node(impl)
+                self._deploy_disco_vag()
+                self._rally()
+                self._get_files()
                     
         except Exception as e:
             t, value, tb = sys.exc_info()
@@ -108,7 +114,7 @@ class os_distri_db():
             logger.info(__doc__)
 
             
-    def deploys(self):
+    def deploy_ubuntu(self):
         # deploy
         try:
             logger.info("Deploying ubuntu on nodes")
@@ -124,55 +130,69 @@ class os_distri_db():
             traceback.print_tb(tb)
 
             
-    def _disco_vag(self, impl="disco"):
+    def _preparation(self, impl="disco"):
         # prepare disco-vagrant
-        main = self.nodes[0]
-        db = self.nodes[1]
-        logger.info("Discovery-vagrant will deploy on : %s, for %s implementation" % (main, impl))
-        logger.info("The databases will be stored on : %s" % db)
+        self.main = self.nodes[0]
+        self.db = self.nodes[1]
+        logger.info("Discovery-vagrant will deploy on : %s, for %s implementation" % (self.main, impl))
+        logger.info("The databases will be stored on : %s" % self.db)
 
         # get the ips for the database and store them into a file
-        ifconfig = ex.process.SshProcess("ifconfig eth0", db, connection_params={'user':'ci'})
+        ifconfig = ex.process.SshProcess("ifconfig eth0", self.db, connection_params={'user':'ci'})
         ifconfig.run()
         with open("ip.txt", "a") as ipfile:
             ipfile.write(ifconfig.stdout)
         logger.info("Ip stored")
-                    
-        # copie the file to the main vm
-        ex.action.Put([main], ["ip.txt"], connection_params={'user':'ci'}).run()
-        logger.info("Ip file copied")
-        ex.action.Remote("git clone -b my-versions https://github.com/Marie-Donnie/discovery-vagrant.git", main, connection_params={'user':'ci'}).run()
-        logger.info("Discovery-Vagrant cloned")
-        # handle the scripts, give access to the databases
-        ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/changeip.sh", main, connection_params={'user':'ci'}).run()
-        ex.action.Remote("wget https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/db-access.sh", db, connection_params={'user':'ci'}).run()    
-        logger.info("Scripts downloaded")
-        ex.action.Remote("chmod +x changeip.sh ; ./changeip.sh ip.txt", main, connection_params={'user':'ci'}).run()
-        ex.action.Remote("chmod +x db-access.sh ; sudo ./db-access.sh", db, connection_params={'user':'ci'}).run()
-        ex.action.Remote("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/&-vagrant/' 05_devstack.sh", main, connection_params={'user':'ci'}).run()
-        ex.action.Remote("cd discovery-vagrant ; sed -i 's/chmod -R a+w \/opt\/logs/&\nmkdir \/vagrant\/logs\nchown stack:stack \/vagrant\/logs\nchmod -R a+w \/vagrant\/logs/' 02_rome.sh", main, connection_params={'user':'ci'}).run()
-        # make some changes for discovery-vagrant, since default uses ROME
-        if (impl=="mysql"):
-            logger.info("Adjusting deployment for mysql")
-            ex.action.Remote("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", main, connection_params={'user':'ci'}).run()
 
-        # use discovery-vagrant with remote databases
+        # copie the file to the self.main vm
+        ex.action.Put([self.main], ["ip.txt"], connection_params={'user':'ci'}).run()
+        logger.info("Ip file copied")
+        commands = [
+            ("git clone -b my-versions"+disco_vagrant, self.main, "Cloning disco-vagrant"),
+            ("wget "+o_s_d+"changeip.sh", self.main, "Downloading changeip.sh"),
+            ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh")
+            ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
+            ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh")
+        ]
+
+        if (impl=="mysql"):
+            commands_self.main.append(("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
+        
+        for line in commands:
+            command = line[0]
+            machine = line[1]
+            log = line[2]
+            self._exec_on_node(command, machine, log)
+
+    def _exec_on_node(self, command, machine, log):
+        logger.info(log)
+        rem = ex.action.Remote(command, machine, connection_params={'user':'ci'}).run()
+        if rem.ok :
+            logger.info("Success")
+        else:
+            logger.info("Failure")
+
+    def _deploy_disco_vag(self):        
+        # use discovery-vagrant with remote databases and all the tweaks above
         logger.info("Deploying discovery devstack")
-        ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", main, connection_params={'user':'ci'}).run()
+        ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", self.main, connection_params={'user':'ci'}).run()
         logger.info("Disco OS deployed")
 
-        
-        # launch the tests
+    def _rally(self):    
+        # clone repository
         logger.info("Cloning rally-vagrant...")
-        ex.action.Remote("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", main, connection_params={'user':'ci'}).run()
+        ex.action.Remote("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", self.main, connection_params={'user':'ci'}).run()
         logger.info("Done")
+        # launch the tests        
         logger.info("Executing tests")
-        ex.action.Remote("cd rally-vagrant ; python rally-g5k.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", main, connection_params={'user':'ci'}).run()
+        ex.action.Remote("cd rally-vagrant ; python rally-g5k.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", self.main, connection_params={'user':'ci'}).run()
         logger.info("Tests finished")
 
-        # get back the json file
+    def _get_files(self):
+        # get back the json file from discovery-vagrant (since the folder is linked to VBox /vagrant)
+        ex.action.Remote("cd discovery-vagrant ; vagrant ssh pop0 ; sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/", self.main, connection_params={'user':'ci'}).run()
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
-        ex.action.Get(main, path, local_location="./results", connection_params={'user':'ci'}).run()
+        ex.action.Get(self.main, path, local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
 
         os.remove("ip.txt")
@@ -180,7 +200,7 @@ class os_distri_db():
     
     # gets the results
     # logger.info("Analyzing the results")    
-    # ex.action.Remote("git clone https://github.com/Marie-Donnie/misc.git", main, connection_params={'user':'ci'}).run()
+    # ex.action.Remote("git clone https://github.com/Marie-Donnie/misc.git", self.main, connection_params={'user':'ci'}).run()
     # ex.action.Remote("cd misc/scripts/nova/ ; chmod +x analyse.sh ; ./analyse.sh", db, connection_params={'user':'ci'}).run()
     # logger.info("Done")
 
