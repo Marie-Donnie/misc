@@ -191,11 +191,12 @@ class os_distri_db():
         logger.info("Tests finished")
 
     def _get_files(self):
+        cmd = "sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/"
         # get back the json file from discovery-vagrant (since the folder is linked to VBox /vagrant)
-        self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 ; sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/", self.main, "Changing the logs directory")
+        self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 -c "+cmd, self.main, "Changing the logs directory")
 
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
-        ex.action.Get(self.main, path, local_location="./results", connection_params={'user':'ci'}).run()
+        ex.action.Get(self.main, [path], local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
 
         os.remove("ip.txt")
