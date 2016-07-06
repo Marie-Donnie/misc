@@ -102,7 +102,6 @@ class os_distri_db():
                     raise ValueError("Use only mysql or disco arguments")                    
                 self.deploy_ubuntu()
                 self._preparation(impl)
-                self._exec_on_node(impl)
                 self._deploy_disco_vag()
                 self._rally()
                 self._get_files()
@@ -147,17 +146,21 @@ class os_distri_db():
         # copie the file to the self.main vm
         ex.action.Put([self.main], ["ip.txt"], connection_params={'user':'ci'}).run()
         logger.info("Ip file copied")
+
+        # set a list of tuples with commands to execute, the node where it will be executed and a log info
         commands = [
-            ("git clone -b my-versions"+disco_vagrant, self.main, "Cloning disco-vagrant"),
+            ("git clone -b my-versions "+disco_vagrant, self.main, "Cloning disco-vagrant"),
             ("wget "+o_s_d+"changeip.sh", self.main, "Downloading changeip.sh"),
-            ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh")
+            ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh"),
             ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
             ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh")
         ]
 
+        # change the branch to download for mysql
         if (impl=="mysql"):
-            commands_self.main.append(("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
-        
+            commands.append(("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
+
+        # execute all commands
         for line in commands:
             command = line[0]
             machine = line[1]
