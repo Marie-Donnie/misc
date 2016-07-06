@@ -2,10 +2,11 @@
 
 ### Requirements
 
-Docopt is required for compute.py which is executed by analyse.sh :
+Docopt and pandas are required for compute.py which is executed by analyse.sh :
 ```bash
-pip install docopt
+pip install -r requirements.txt
 ```
+
 ### Usage
 
 Meant to be used with my fork of Nova and ROME :
