@@ -67,7 +67,6 @@ class os_distri_db():
 
     def run(self):
         """Perform experiment"""
-        
         try:
             if self.job_id is None:
                 # make a reservation                                 
@@ -139,7 +138,7 @@ class os_distri_db():
         # get the ips for the database and store them into a file
         ifconfig = ex.process.SshProcess("ifconfig eth0", self.db, connection_params={'user':'ci'})
         ifconfig.run()
-        with open("ip.txt", "a") as ipfile:
+        with open("ip.txt", "w") as ipfile:
             ipfile.write(ifconfig.stdout)
         logger.info("Ip stored")
 
@@ -193,7 +192,8 @@ class os_distri_db():
 
     def _get_files(self):
         # get back the json file from discovery-vagrant (since the folder is linked to VBox /vagrant)
-        ex.action.Remote("cd discovery-vagrant ; vagrant ssh pop0 ; sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/", self.main, connection_params={'user':'ci'}).run()
+        self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 ; sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/", self.main, "Changing the logs directory")
+
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
         ex.action.Get(self.main, path, local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
