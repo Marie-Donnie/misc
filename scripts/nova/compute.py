@@ -16,7 +16,7 @@ Options:
 
 import json
 import pandas as pd
-import matplotlib.pyplot as pl
+#import matplotlib.pyplot as pl
 import os
 from docopt import docopt
 
@@ -59,7 +59,7 @@ class compute():
                 chemin = os.path.dirname(os.path.realpath(__file__))
                 with open(chemin+"/results.txt","w") as results:
                     results.write(pduree.to_string())
-                    # testing functions
+                    # testing functions, uncomment also matplotlib import to use it
                     # print(pduree)
                     # pduree.plot.bar(stacked=True)
                     # plt.show()
