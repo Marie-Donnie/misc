@@ -200,13 +200,7 @@ class os_distri_db():
         logger.info("Got file %s" % path)
 
         os.remove("ip.txt")
-        logger.info("Files removed")
-    
-    # gets the results
-    # logger.info("Analyzing the results")    
-    # ex.action.Remote("git clone https://github.com/Marie-Donnie/misc.git", self.main, connection_params={'user':'ci'}).run()
-    # ex.action.Remote("cd misc/scripts/nova/ ; chmod +x analyse.sh ; ./analyse.sh", db, connection_params={'user':'ci'}).run()
-    # logger.info("Done")
+        logger.info("ip.txt removed")
 
 
 
