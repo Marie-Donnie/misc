@@ -189,10 +189,10 @@ class os_distri_db():
 
 
     def _get_files(self, impl="disco"):
-        cmd = "'sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/'"
-        # get back the json file from discovery-vagrant (since the folder is linked to VBox /vagrant)
-        self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 -c "+cmd, self.main, "Changing the logs directory")
-
+        copy = o_s_d+"copylog.sh"
+        self._exec_on_node("cd discovery-vagrant ; wget "+copy+" ; chmod +x copylog.sh ;", self.main, "Downloading copylog.sh")
+        self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 -c 'sudo /vagrant/copylog.sh'", self.main, "Changing the logs directory")
+        
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
         ex.action.Get(self.main, [path], local_location="./results", connection_params={'user':'ci'}).run()
         logger.info("Got file %s" % path)
