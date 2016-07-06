@@ -103,7 +103,7 @@ class os_distri_db():
                 self._preparation(impl)
                 self._deploy_disco_vag()
                 self._rally()
-                self._get_files()
+                self._get_files(impl)
                     
         except Exception as e:
             t, value, tb = sys.exc_info()
@@ -166,32 +166,30 @@ class os_distri_db():
             log = line[2]
             self._exec_on_node(command, machine, log)
 
+            
     def _exec_on_node(self, command, machine, log):
         logger.info(log)
         rem = ex.action.Remote(command, machine, connection_params={'user':'ci'}).run()
         if rem.ok :
             logger.info("Success")
         else:
-            logger.info("Failure")
+            logger.error("Failure")
 
+            
     def _deploy_disco_vag(self):        
         # use discovery-vagrant with remote databases and all the tweaks above
-        logger.info("Deploying discovery devstack")
-        ex.action.Remote("cd discovery-vagrant ; ./deploy.sh", self.main, connection_params={'user':'ci'}).run()
-        logger.info("Disco OS deployed")
+        self._exec_on_node("cd discovery-vagrant ; ./deploy.sh", self.main, "Deploying discovery devstack")
+        
 
     def _rally(self):    
         # clone repository
-        logger.info("Cloning rally-vagrant...")
-        ex.action.Remote("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", self.main, connection_params={'user':'ci'}).run()
-        logger.info("Done")
-        # launch the tests        
-        logger.info("Executing tests")
-        ex.action.Remote("cd rally-vagrant ; python rally-g5k.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", self.main, connection_params={'user':'ci'}).run()
-        logger.info("Tests finished")
+        self._exec_on_node("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", self.main, "Cloning rally-vagrant")                          
+        # launch the tests
+        self._exec_on_node("cd rally-vagrant ; python rally-g5k.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", self.main, "Executing tests")
 
-    def _get_files(self):
-        cmd = "sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/"
+
+    def _get_files(self, impl="disco"):
+        cmd = "'sudo su root ; mkdir /vagrant/logs ; cp /opt/logs/db_api_*.log /vagrant/logs/'"
         # get back the json file from discovery-vagrant (since the folder is linked to VBox /vagrant)
         self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 -c "+cmd, self.main, "Changing the logs directory")
 
