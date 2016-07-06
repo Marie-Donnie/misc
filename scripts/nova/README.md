@@ -1,6 +1,12 @@
 ## Get the average duration of db/api methods for both implementations (SqlAlchemy/ROME)
 
-### Use
+### Requirements
+
+Docopt is required for compute.py which is executed by analyse.sh :
+```bash
+pip install docopt
+```
+### Usage
 
 Meant to be used with my fork of Nova and ROME :
 
@@ -24,3 +30,4 @@ You have now two files in `/opt/logs` : `db_api_mysql` and `db_api_disco`
 Simply run `./analyse.sh /opt/logs/` that will generate the results in a text file in the folder where you ran the script.
 
 You can also use the script with `analyse <folder-path>` if you already have the logs elsewhere.
+
