@@ -185,7 +185,7 @@ class os_distri_db():
         # clone repository
         self._exec_on_node("git clone https://github.com/BeyondTheClouds/rally-vagrant.git", self.main, "Cloning rally-vagrant")
         # install requirements
-        self._exec_on_node("cd rally-vagrant ; pip install -r requirements.txt", self.main, "Installing requirements")                        
+        self._exec_on_node("cd rally-vagrant ; sudo pip install -r requirements.txt", self.main, "Installing requirements")                        
         # launch the tests
         self._exec_on_node("cd rally-vagrant ; python rally.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", self.main, "Executing tests")
 
