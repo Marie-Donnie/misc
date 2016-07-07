@@ -16,4 +16,4 @@ mysql="db_api_mysql"
 
 # run the scripts
 python $current/resultsjson.py $dir$disco.log $dir$mysql.log
-python $current/compute.py $dir$disco.json $dir$mysql.json
+python $current/compute.py run --path $dir -m -d
