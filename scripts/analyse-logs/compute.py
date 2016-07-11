@@ -7,10 +7,11 @@ Usage:
     compute.py --version
 
 Options:
-    -h --help          Show this screen.
-    --version          Show version.
-    --disco=<disco>    Path to disco file
-    --mysql=<mysql>    Path fo mysql file
+    -h --help        Show this screen.
+    --version        Show version.
+    --path=<path>    Path to discovery and/or mysql file(s)
+    -d               Use discovery file
+    -m               Use mysql file
 
 """
 
