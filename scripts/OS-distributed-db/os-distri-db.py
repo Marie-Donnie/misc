@@ -93,8 +93,13 @@ class os_distri_db():
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
             logger.info(__doc__)
+            exit
 
         try:
+            # this will be useful to create a result folder
+            self.dt = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+
+            # run tests for each implementation
             for impl in self.implementation:
                 logger.info("Using %s for implementation" % impl)
                 if impl not in {"mysql", "disco"}:
@@ -110,6 +115,10 @@ class os_distri_db():
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
             logger.info(__doc__)
+            exit
+
+        # try:
+            
 
             
     def deploy_ubuntu(self):
@@ -194,14 +203,20 @@ class os_distri_db():
         copy = o_s_d+"copylog.sh"
         self._exec_on_node("cd discovery-vagrant ; wget "+copy+" ; chmod +x copylog.sh ;", self.main, "Downloading copylog.sh")
         self._exec_on_node("cd discovery-vagrant ; vagrant ssh pop0 -c 'sudo /vagrant/copylog.sh'", self.main, "Changing the logs directory")
-        
+
+        # path to logs
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
-        ex.action.Get(self.main, [path], local_location="./results", connection_params={'user':'ci'}).run()
-        logger.info("Got file %s" % path)
+        
+        # creates a folder for results
+        self.result_dir = os.path.join(os.getcwd(), "./results/%s" % self.dt)
+        if not os.path.exists(self.result_dir):
+            os.makedirs(self.result_dir)
+            
+        ex.action.Get(self.main, [path], local_location=self.result_dir, connection_params={'user':'ci'}).run()
+        logger.info("Got file %s to folder : " % (path, self.result_dir))
 
         os.remove("ip.txt")
         logger.info("ip.txt removed")
-
 
 
 if __name__ == "__main__":
