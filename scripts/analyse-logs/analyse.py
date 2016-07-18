@@ -14,7 +14,6 @@ Options:
 
 """
 import json
-import compute
 import os
 import pandas as pd
 from docopt import docopt
@@ -96,8 +95,8 @@ class analyse():
             pduree = duree2[0]
 
         # save the results
-        chemin = os.path.dirname(os.path.realpath(__file__))
-        with open(chemin+"/results.txt","w") as results:
+        # chemin = os.path.dirname(os.path.realpath(__file__))
+        with open(self.path+"/results.txt","w") as results:
             results.write(pduree.to_string())
             print("File written")
             # testing functions, uncomment also matplotlib import to use it
