@@ -80,7 +80,7 @@ class os_distri_db():
                 self.nodes = ex5.get_oar_job_nodes(job_id, site)
                 logger.info("Reservation done")
                 if self.resa_only:
-                    exit
+                    sys.exit(0)
             else:
                 if self.job_id.isdigit():
                     self.nodes = ex5.get_oar_job_nodes(int(self.job_id), self.job_site)
@@ -93,7 +93,7 @@ class os_distri_db():
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
             logger.info(__doc__)
-            exit
+            sys.exit(3)
 
         try:
             # this will be useful to create a result folder
@@ -115,7 +115,7 @@ class os_distri_db():
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
             logger.info(__doc__)
-            exit
+            sys.exit(4)
 
         # try:
             
@@ -135,6 +135,7 @@ class os_distri_db():
             t, value, tb = sys.exc_info()
             print str(t) + " " + str(value)
             traceback.print_tb(tb)
+            sys.exit(5)
 
             
     def _preparation(self, impl="disco"):
@@ -208,7 +209,7 @@ class os_distri_db():
         path = "/home/ci/discovery-vagrant/logs/db_api_" + impl + ".log"
         
         # creates a folder for results
-        self.result_dir = os.path.join(os.getcwd(), "./results/%s" % self.dt)
+        self.result_dir = os.path.join(os.getcwd(), "results/result-%s" % self.dt)
         if not os.path.exists(self.result_dir):
             os.makedirs(self.result_dir)
             
