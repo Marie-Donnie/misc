@@ -98,6 +98,7 @@ class analyse():
         # chemin = os.path.dirname(os.path.realpath(__file__))
         with open(self.path+"/results.txt","w") as results:
             results.write(pduree.to_string())
+            results.write("\n")
             print("File written")
             # testing functions, uncomment also matplotlib import to use it
             # print(pduree)
