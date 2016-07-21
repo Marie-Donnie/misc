@@ -197,7 +197,7 @@ class os_distri_db():
         # install requirements
         self._exec_on_node("cd rally-vagrant ; sudo pip install -r requirements.txt", self.main, "Installing requirements")                        
         # launch the tests
-        self._exec_on_node("cd rally-vagrant ; python rally.py config.json /home/ci/jenkins/workspace/Rally-G5k/rally/samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json", self.main, "Executing tests")
+        self._exec_on_node("cd rally-vagrant ; python rally.py config.json --file scenarios.txt", self.main, "Executing tests")
 
 
     def _get_files(self, impl="disco"):
