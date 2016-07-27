@@ -37,13 +37,9 @@ class folder_analyse():
                     #     average.write(ifconfig.stdout)
                     if "db_api_disco.json" in file:
                         self.disco.append(os.path.join(path,file))
-                        print(self.disco)
                     else:
                         if "db_api_mysql.json" in file:
                             self.mysql.append(os.path.join(path,file))
-                            print(self.mysql)
-                        else :
-                            print("lul")
             
         except Exception as e:
             t, value, tb = sys.exc_info()
