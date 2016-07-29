@@ -27,14 +27,16 @@ python os-distri-db.py run --full
 
 ### More information
 ```
+Openstack with remote databases
+
 Usage:
-    testresa.py reservation [--site <city>]
-    testresa.py reservation [--duration <time>]
-    testresa.py reservation [--nodes <nb>]
-    testresa.py reservation --only
-    testresa.py run [(--job_id <id> --job_site <city>)(--full | -i <impl>)]
-    testresa.py (-h | --help)
-    testresa.py --version
+    os-distri-db.py reservation [--site <city>]
+    os-distri-db.py reservation [--duration <time>]
+    os-distri-db.py reservation [--nodes <nb>]
+    os-distri-db.py reservation --only
+    os-distri-db.py run [(--job_id <id> --job_site <city>)(--full | -i <impl>)]
+    os-distri-db.py (-h | --help)
+    os-distri-db.py --version
 
 Options:
     -h --help          Show this screen
@@ -43,7 +45,8 @@ Options:
     --duration <time>  A duration, formatted hh:mm:ss, must be <= to [default: 03:00:00]
     --nodes <nb>       Number of nodes [default: 2]
     --full             Run tests for both implementation
-    -i <impl>          Choose implementation 
+    -i <impl>          Choose implementation (disco or mysql)
     --job_id <id>      Specify the job id of an already created job
     --job_site <city>  Specify the job site of an already created job
+
 ```
