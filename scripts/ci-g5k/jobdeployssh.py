@@ -49,11 +49,12 @@ try:
     # print("Deployed on " + deployed_host[0])
     
     if len(deployed_hosts) != 0:
+        # commented because the slave agent is already downloaded
         # gets the agent started after downloading it
-        print("Downloading and launching the slave agent")
-        ex.action.Remote("wget https://ci.inria.fr/beyondtheclouds/jnlpJars/slave.jar", deployed_hosts, connection_params={'user':'ci'}).run()
+        # print("Downloading and launching the slave agent")
+        # ex.action.Remote("wget https://ci.inria.fr/beyondtheclouds/jnlpJars/slave.jar", deployed_hosts, connection_params={'user':'ci'}).run()
         # replaces the process with the ssh connection and the launching of the slave agent
-        os.execl("/usr/bin/ssh", "/usr/bin/ssh", "ci@"+list(deployed_hosts)[0], "java -jar /home/ci/slave.jar")
+        os.execl("/usr/bin/ssh", "/usr/bin/ssh", "root@"+list(deployed_hosts)[0], "java -jar /home/ci/slave.jar")
         
     else:
         raise DeploymentError("Error while deploying")
