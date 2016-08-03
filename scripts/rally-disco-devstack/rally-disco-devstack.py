@@ -118,6 +118,17 @@ class rally_disco_devstack():
 
         else:
             print("Wrote " + dest)
+            
+        # Generate the XML file
+        xml_file = os.path.splitext(bench_file)[0] + '.xml'
+        dest = os.path.join(self.result_dir, xml_file)
+        result = os.system("rally task report --junit --out=" + dest)
+
+        if result != 0:
+            print("Could not generate the XML result file")
+
+        else:
+            print("Wrote " + dest)
 
         # Get the metrics from Rally		
         metrics_file = os.path.join(self.result_dir, os.path.splitext(bench_file)[0] + '.json')
