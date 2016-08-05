@@ -42,7 +42,7 @@ end = ex.time_utils.format_date(time.time()+11000)
 # must have a .env on the frontend that will deploy the ubuntu 
 envfile = "envdb/monubuntu.env"
 
-disco_vagrant = "https://github.com/Marie-Donnie/discovery-vagrant.git"
+disco_vagrant = "https://github.com/BeyondTheClouds/discovery-vagrant.git"
 o_s_d = "https://raw.githubusercontent.com/Marie-Donnie/misc/master/scripts/OS-distributed-db/"
 
 class os_distri_db():
@@ -162,12 +162,14 @@ class os_distri_db():
             ("wget "+o_s_d+"changeip.sh", self.main, "Downloading changeip.sh"),
             ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh"),
             ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
-            ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh")
+            ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh"),
+            ("cd discovery-vagrant ; sed -i 's/gen_logs = False/gen_logs = True/' 05_devstack.sh", self.db, "Enabling the logs")
         ]
 
+        
         # change the branch to download for mysql
         if (impl=="mysql"):
-            commands.append(("cd discovery-vagrant ; sed -i 's/NOVA_BRANCH=disco\/mitaka/NOVA_BRANCH=vanilla/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
+            commands.append(("cd discovery-vagrant ; sed -i 's/db_backend = redis/db_backend = mysql/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
 
         # execute all commands
         for line in commands:
