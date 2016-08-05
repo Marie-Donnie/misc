@@ -100,7 +100,7 @@ class analyse():
             results.write(pduree.to_string())
             results.write("\n")
             print("File written")
-            # testing functions, uncomment also matplotlib import to use it
+            # testing functions, import matplotlib to use it
             # print(pduree)
             # pduree.plot.bar(stacked=True)
             # plt.show()   
