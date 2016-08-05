@@ -1,12 +1,14 @@
 """Wrapper for Rally to use with a Discovery Openstack deployed with Devstack
+
 Usage:
     rally-disco-devstack.py ( --file=<file> | <file>... ) [-h | --help][--version]
+
 Options:
     -h --help       Show this screen
     --version       Show version
     --file=<file>   Uses a file containing a list of scenarios
-Arguments:
-    <config>        The config file to use
+
+Arguments
     <file>          The scenarios Rally will use
 """
 
@@ -29,26 +31,20 @@ class rally_disco_devstack():
 
     def __init__(self):
             """Define options for the experiment"""
-            self.argus = docopt(__doc__, version = 'Rally tests 1.0')
+            self.argus = docopt(__doc__, version = 'Rally tests 2.0')
             print(self.argus)
 
     def run(self):
         """Perform experiment"""
-        # Load the configuration file
-        try:
-            with open(self.argus['<config>']) as config_file:
-                self.config = json.load(config_file)
-        except:
-            print("Cannot read configuration file")
-            t, value, tb = sys.exc_info()
-            print str(t) + " " + str(value)
-            exit(3)
-
         try :
             self.make_result_dir()
             self.benchmarking()
-            self.get_logs()
-
+            
+        except:
+            print("Something went wrong lol")
+            t, value, tb = sys.exc_info()
+            print str(t) + " " + str(value)
+            exit(3)
 
     def make_result_dir(self):
         # Make the directory for the results
@@ -101,7 +97,7 @@ class rally_disco_devstack():
                 continue
             else:
                 # Get the results back
-                self._get_logs(bench_basename)
+                self.get_logs(bench_basename)
 
             print(COLOR+'----------------------------------------'+ENDC)
 

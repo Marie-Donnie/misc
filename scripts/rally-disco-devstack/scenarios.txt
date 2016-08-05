@@ -1,0 +1,16 @@
+samples/tasks/scenarios/nova/create-and-delete-floating-ips-bulk.json
+samples/tasks/scenarios/nova/create-and-delete-keypair.json
+samples/tasks/scenarios/nova/create-and-delete-network.json
+samples/tasks/scenarios/nova/create-and-delete-secgroups.json
+samples/tasks/scenarios/nova/create-and-list-keypairs.json
+samples/tasks/scenarios/nova/create-and-list-networks.json
+samples/tasks/scenarios/nova/create-and-list-secgroups.json
+samples/tasks/scenarios/nova/create-and-update-secgroups.json
+samples/tasks/scenarios/nova/list-agents.json
+samples/tasks/scenarios/nova/list-aggregates.json
+samples/tasks/scenarios/nova/list-availability-zones.json
+samples/tasks/scenarios/nova/list-hosts.json
+samples/tasks/scenarios/nova/list-hypervisors.json
+samples/tasks/scenarios/nova/list-images.json
+samples/tasks/scenarios/nova/list-services.json
+
