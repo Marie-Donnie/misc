@@ -216,8 +216,6 @@ class os_distri_db():
         ex.action.Get(self.main, [path], local_location=self.result_dir, connection_params={'user':'ci'}).run()
         logger.info("Got file %s to folder : %s" % (path, self.result_dir))
 
-        os.remove("ip.txt")
-        logger.info("ip.txt removed")
 
 
 if __name__ == "__main__":
