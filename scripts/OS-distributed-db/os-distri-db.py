@@ -158,7 +158,7 @@ class os_distri_db():
 
         # set a list of tuples with commands to execute, the node where it will be executed and a log info
         commands = [
-            ("git clone -b my-versions "+disco_vagrant, self.main, "Cloning disco-vagrant"),
+            ("git clone "+disco_vagrant, self.main, "Cloning disco-vagrant"),
             ("wget "+o_s_d+"changeip.sh", self.main, "Downloading changeip.sh"),
             ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh"),
             ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
