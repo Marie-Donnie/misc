@@ -41,7 +41,7 @@ class rally_disco_devstack():
             self.benchmarking()
             
         except:
-            print("Something went wrong lol")
+            print("Something went wrong")
             t, value, tb = sys.exc_info()
             print str(t) + " " + str(value)
             exit(3)
