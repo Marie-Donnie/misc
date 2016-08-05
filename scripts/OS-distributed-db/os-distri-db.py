@@ -146,30 +146,28 @@ class os_distri_db():
         logger.info("The databases will be stored on : %s" % self.db)
 
         # get the ips for the database and store them into a file
-        ifconfig = ex.process.SshProcess("ifconfig eth0", self.db, connection_params={'user':'ci'})
-        ifconfig.run()
-        with open("ip.txt", "w") as ipfile:
-            ipfile.write(ifconfig.stdout)
-        logger.info("Ip stored")
+        ifconfig_ip = ex.process.SshProcess("ifconfig eth0 | grep \"inet addr:\" $ipfile | cut -d: -f2 | awk '{ print $1}'", self.db, connection_params={'user':'ci'}).run()
+        logger.info("Ip saved : %s" % ifconfig_ip.stdout)
 
-        # copie the file to the self.main vm
-        ex.action.Put([self.main], ["ip.txt"], connection_params={'user':'ci'}).run()
-        logger.info("Ip file copied")
 
         # set a list of tuples with commands to execute, the node where it will be executed and a log info
         commands = [
             ("git clone "+disco_vagrant, self.main, "Cloning disco-vagrant"),
             ("wget "+o_s_d+"changeip.sh", self.main, "Downloading changeip.sh"),
-            ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh"),
+            ("chmod +x changeip.sh ; ./changeip.sh "+ ifconfig_ip.stdout, self.main, "Changing permissions of changeip.sh and runs it"),
             ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
-            ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh"),
+            ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh and runs it"),
             ("cd discovery-vagrant ; sed -i 's/gen_logs = False/gen_logs = True/' 05_devstack.sh", self.main, "Enabling the logs")
         ]
-
         
         # change the branch to download for mysql
         if (impl=="mysql"):
             commands.append(("cd discovery-vagrant ; sed -i 's/db_backend = redis/db_backend = mysql/' 05_devstack.sh", self.main, "Changing implementation to mysql"))
+
+        # start redis
+        if (impl=="disco"):
+            commands.append(("redis-server --daemonize yes", self.db, "Starting redis server"))
+        
 
         # execute all commands
         for line in commands:

@@ -5,10 +5,8 @@
 # the result of "ifconfig eth0" from both VMs.
 
 # gets the ips from the file
-ipfile="$1"
-grep "inet addr:" $ipfile | cut -d: -f2 | awk '{ print $1}' > ip.txt
-ip=$(head -1 ip.txt)
-echo $ip
+ip="$1"
+ 
 
 # stores them in the discovery-vagrant scripts for deployment
 cmd="sed -i 's\/\^redis_cluster_enabled: False\$\/\&\\\nnodes=${ip}\/' rome.conf"
