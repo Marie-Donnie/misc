@@ -163,7 +163,7 @@ class os_distri_db():
             ("chmod +x changeip.sh ; ./changeip.sh ip.txt", self.main, "Changing permissions of changeip.sh"),
             ("wget "+o_s_d+"db-access.sh", self.db, "Downloading db-access.sh"),
             ("chmod +x db-access.sh ; sudo ./db-access.sh", self.db, "Changing permissions of db-access.sh"),
-            ("cd discovery-vagrant ; sed -i 's/gen_logs = False/gen_logs = True/' 05_devstack.sh", self.db, "Enabling the logs")
+            ("cd discovery-vagrant ; sed -i 's/gen_logs = False/gen_logs = True/' 05_devstack.sh", self.main, "Enabling the logs")
         ]
 
         
