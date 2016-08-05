@@ -9,7 +9,7 @@ ip="$1"
  
 
 # stores them in the discovery-vagrant scripts for deployment
-cmd="sed -i 's\/\^redis_cluster_enabled: False\$\/\&\\\nnodes=${ip}\/' rome.conf"
+cmd="echo 'nodes=${ip}' >> \$dir/rome.conf"
   # add a "MYSQL_HOST=<IpAddressForMySqlDB>" before EOM in file 05_devstack.sh
 sed -i "s/^EOM$/MYSQL_HOST=${ip}\nMYSQL_USER=stack\nMYSQL_PASSWORD=devstack\n&/" discovery-vagrant/05_devstack.sh
   # add a "sed -i s/^redis_cluster_enabled: False$/&\nnodes=<IpAdressForRedisDB>/ rome.conf"
